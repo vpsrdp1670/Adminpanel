@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - User Data Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --warning: #f8961e;
+            --info: #4895ef;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .description {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .panel-title-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .panel-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            color: var(--dark);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), var(--info));
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), var(--warning));
+        }
+
+        .btn-refresh {
+            background: linear-gradient(135deg, #4cc9f0, #4895ef);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-refresh:hover {
+            animation: rotate 0.5s ease;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg) translateY(-2px); }
+            to { transform: rotate(360deg) translateY(-2px); }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status.pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status.approved {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status.rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.4s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background-color: #28a745;
+        }
+
+        .notification.error {
+            background-color: #dc3545;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .action-buttons button {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .filter-box {
+            min-width: 200px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .search-filter {
+                flex-direction: column;
+            }
+            
+            th, td {
+                padding: 10px 5px;
+                font-size: 0.9rem;
+            }
+            
+            .panel-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Admin Panel</h1>
+            <p class="description">User submissions ko yahan manage karein - Approve, Reject ya Delete karein</p>
+        </header>
+
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title-container">
+                    <div class="panel-icon">⚙️</div>
+                    <h2 class="panel-title">User Submissions Management</h2>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-refresh" onclick="loadAdminData()">
+                        🔄 Refresh Data
+                    </button>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <h3 id="total-submissions">0</h3>
+                    <p>Total Submissions</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="pending-submissions">0</h3>
+                    <p>Pending Review</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="approved-submissions">0</h3>
+                    <p>Approved</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="rejected-submissions">0</h3>
+                    <p>Rejected</p>
+                </div>
+            </div>
+
+            <div class="search-filter">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Search by name, email, or message...">
+                </div>
+                <div class="filter-box">
+                    <select id="status-filter">
+                        <option value="">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="filter-box">
+                    <select id="category-filter">
+                        <option value="">All Categories</option>
+                        <option value="Feedback">Feedback</option>
+                        <option value="Support Request">Support Request</option>
+                        <option value="Feature Suggestion">Feature Suggestion</option>
+                        <option value="Bug Report">Bug Report</option>
+                        <option value="Complaint">Complaint</option>
+                    </select>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Category</th>
+                        <th>Message</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="submissions-table">
+                    <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <footer>
+        <p>Admin Panel &copy; 2023 | User Data Management</p>
+    </footer>
+
+    <script>
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Load admin data
+        function loadAdminData() {
+            const submissions = JSON.parse(localStorage.getItem('userSubmissions')) || [];
+            
+            // Update stats
+            document.getElementById('total-submissions').textContent = submissions.length;
+            document.getElementById('pending-submissions').textContent = 
+                submissions.filter(s => s.status === 'Pending').length;
+            document.getElementById('approved-submissions').textContent = 
+                submissions.filter(s => s.status === 'Approved').length;
+            document.getElementById('rejected-submissions').textContent = 
+                submissions.filter(s => s.status === 'Rejected').length;
+            
+            // Get filter values
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('status-filter').value;
+            const categoryFilter = document.getElementById('category-filter').value;
+            
+            // Filter submissions
+            let filteredSubmissions = submissions;
+            
+            if (searchTerm) {
+                filteredSubmissions = filteredSubmissions.filter(s => 
+                    s.name.toLowerCase().includes(searchTerm) ||
+                    s.email.toLowerCase().includes(searchTerm) ||
+                    s.message.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (statusFilter) {
+                filteredSubmissions = filteredSubmissions.filter(s => s.status === statusFilter);
+            }
+            
+            if (categoryFilter) {
+                filteredSubmissions = filteredSubmissions.filter(s => s.category === categoryFilter);
+            }
+            
+            // Update table
+            const tableBody = document.getElementById('submissions-table');
+            tableBody.innerHTML = '';
+            
+            if (filteredSubmissions.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Koi submissions nahi mili</td></tr>';
+                return;
+            }
+            
+            filteredSubmissions.forEach(submission => {
+                const row = document.createElement('tr');
+                // Shorten message for display
+                const shortMessage = submission.message.length > 30 
+                    ? submission.message.substring(0, 30) + '...' 
+                    : submission.message;
+                    
+                row.innerHTML = `
+                    <td>${submission.id}</td>
+                    <td>${submission.name}</td>
+                    <td>${submission.email}</td>
+                    <td>${submission.phone}</td>
+                    <td>${submission.category}</td>
+                    <td title="${submission.message}">${shortMessage}</td>
+                    <td>${submission.date}<br>${submission.time}</td>
+                    <td><span class="status ${submission.status.toLowerCase()}">${submission.status}</span></td>
+                    <td class="action-buttons">
+                        <button onclick="updateStatus(${submission.id}, 'Approved')" class="btn btn-success">Approve</button>
+                        <button onclick="updateStatus(${submission.id}, 'Rejected')" class="btn btn-danger">Reject</button>
+                        <button onclick="deleteSubmission(${submission.id})" class="btn" style="background: #6c757d;">Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Show refresh notification
+            showNotification('Data refreshed successfully!', 'success');
+        }
+
+        // Update submission status
+        function updateStatus(id, status) {
+            const submissions = JSON.parse(localStorage.getItem('userSubmissions')) || [];
+            const submissionIndex = submissions.findIndex(s => s.id === id);
+            
+            if (submissionIndex !== -1) {
+                submissions[submissionIndex].status = status;
+                localStorage.setItem('userSubmissions', JSON.stringify(submissions));
+                loadAdminData();
+                showNotification(`Submission ${status.toLowerCase()} successfully`, 'success');
+            }
+        }
+
+        // Delete submission
+        function deleteSubmission(id) {
+            if (confirm('Kya aap sure hain is submission ko delete karne ke liye?')) {
+                const submissions = JSON.parse(localStorage.getItem('userSubmissions')) || [];
+                const updatedSubmissions = submissions.filter(s => s.id !== id);
+                localStorage.setItem('userSubmissions', JSON.stringify(updatedSubmissions));
+                loadAdminData();
+                showNotification('Submission delete ho gaya hai', 'success');
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // If there's no data in localStorage, initialize with some sample data
+            if (!localStorage.getItem('userSubmissions')) {
+                const sampleData = [
+                    {
+                        id: 1,
+                        name: "Rahul Sharma",
+                        email: "rahul@example.com",
+                        phone: "9876543210",
+                        category: "Feedback",
+                        message: "Bahut accha platform hai! User friendly interface aur fast performance.",
+                        status: "Approved",
+                        date: "15/10/2023",
+                        time: "10:30:45"
+                    },
+                    {
+                        id: 2,
+                        name: "Priya Patel",
+                        email: "priya@example.com",
+                        phone: "9876543211",
+                        category: "Support Request",
+                        message: "Mera login nahi ho raha hai. Password reset ka option kaam nahi kar raha.",
+                        status: "Pending",
+                        date: "16/10/2023",
+                        time: "14:20:15"
+                    },
+                    {
+                        id: 3,
+                        name: "Amit Kumar",
+                        email: "amit@example.com",
+                        phone: "9876543212",
+                        category: "Feature Suggestion",
+                        message: "Dark mode option hona chahiye. Raat mein use karte time aankhon par load kam padega.",
+                        status: "Rejected",
+                        date: "17/10/2023",
+                        time: "09:45:30"
+                    }
+                ];
+                localStorage.setItem('userSubmissions', JSON.stringify(sampleData));
+            }
+            
+            // Load initial data
+            loadAdminData();
+            
+            // Add event listeners for search and filter
+            document.getElementById('search-input').addEventListener('input', loadAdminData);
+            document.getElementById('status-filter').addEventListener('change', loadAdminData);
+            document.getElementById('category-filter').addEventListener('change', loadAdminData);
+        });
+    </script>
+</body>
+</html>
